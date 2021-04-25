@@ -6,6 +6,15 @@ __pycache__/
 # C extensions
 *.so
 
+# vagrant settings
+.vagrant/
+
+# idea
+.idea/
+
+# box
+*.box
+
 # Distribution / packaging
 .Python
 build/
