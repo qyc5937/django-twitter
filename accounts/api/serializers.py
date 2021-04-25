@@ -18,7 +18,6 @@ class SignupSerializer(serializers.ModelSerializer):
         fields = ('username', 'email', 'password')
 
     def validate(self, data):
-        # TODO<HOMEWORK> 增加验证 username 是不是只由给定的字符集合构成
         if User.objects.filter(username=data['username'].lower()).exists():
             raise exceptions.ValidationError({
                 'message': 'This username has been occupied.'
@@ -47,7 +46,7 @@ class LoginSerializer(serializers.Serializer):
     @action(methods=['GET'], detail=False)
     def login_status(self, request):
         """
-        查看用户当前的登录状态和具体信息
+        check if user is logged in
         """
 
         data = {'has_logged_in': request.user.is_authenticated}

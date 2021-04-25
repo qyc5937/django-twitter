@@ -26,18 +26,8 @@ class AccountViewSet(viewsets.ViewSet):
     @action(methods=['POST'], detail=False)
     def signup(self, request):
         """
-        使用 username, email, password 进行注册
-        注册中用到的 SignupSerializer 在 accounts/api/serializers.py 中：
+        create user
         """
-        # 不太优雅的写法
-        # username = request.data.get('username')
-        # if not username:
-        # return Response("username required", status=400)
-        # password = request.data.get('password')
-        # if not password:
-        # return Response("password required", status=400)
-        # if User.objects.filter(username=username).exists():
-        # return Response("password required", status=400)
         serializer = SignupSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({
@@ -56,7 +46,7 @@ class AccountViewSet(viewsets.ViewSet):
     @action(methods=['POST'], detail=False)
     def login(self, request):
         """
-        默认的 username 是 admin, password 也是 admin
+        login
         """
 
         serializer = LoginSerializer(data=request.data)
@@ -83,7 +73,7 @@ class AccountViewSet(viewsets.ViewSet):
     @action(methods=['GET'], detail=False)
     def login_status(self, request):
         """
-        查看用户当前的登录状态和具体信息
+        check login status
         """
 
         data = {'has_logged_in': request.user.is_authenticated}
@@ -94,7 +84,7 @@ class AccountViewSet(viewsets.ViewSet):
     @action(methods=['POST'], detail=False)
     def logout(self, request):
         """
-        登出当前用户
+        logout current user
         """
 
         django_logout(request)
