@@ -1,7 +1,5 @@
-from django.contrib.auth.models import User, Group
-from rest_framework import serializers, exceptions, request
-from rest_framework.decorators import action
-from rest_framework.response import Response
+from django.contrib.auth.models import User
+from rest_framework import serializers, exceptions
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -42,14 +40,3 @@ class SignupSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
-
-    @action(methods=['GET'], detail=False)
-    def login_status(self, request):
-        """
-        check if user is logged in
-        """
-
-        data = {'has_logged_in': request.user.is_authenticated}
-        if request.user.is_authenticated:
-            data['user'] = UserSerializer(request.user).data
-        return Response(data)
