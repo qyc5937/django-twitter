@@ -1,30 +1,18 @@
-from django.test import TestCase
+from testing.testcases import TestCase
+from testing.testconstants import *
 from rest_framework.test import APIClient
-from django.contrib.auth.models import User
-import sys
 
-LOGIN_URL = '/api/accounts/login/'
-LOGOUT_URL = '/api/accounts/logout/'
-LOGIN_STATUS_URL = '/api/accounts/login_status/'
-SIGNUP_URL = '/api/accounts/signup/'
-TEST_USERNAME= 'testuser'
-TEST_PASSWORD= 'testpass'
-TEST_EMAIL='testemail@test.com'
 
 class AccountApiTests(TestCase):
 
     #initial setup
     def setUp(self):
         self.client = APIClient()
-        self.user = self.createUser(
-            username=TEST_USERNAME,
+        self.user = self.create_user(
+            username=TEST_USER,
             email=TEST_EMAIL,
             password=TEST_PASSWORD,
         )
-
-    #create user
-    def createUser(self, username, email, password):
-        return User.objects.create_user(username=username, password=password, email=email)
 
     #test login functionality
     def test_login(self):
@@ -111,7 +99,7 @@ class AccountApiTests(TestCase):
         self.assertEqual(response.status_code, 400)
 
         #bad email
-        data['username'] = TEST_USERNAME
+        data['username'] = TEST_USER
         data['email'] = 'aa'
         response = self.client.post(SIGNUP_URL, data)
         self.assertEqual(response.status_code, 400)
@@ -131,7 +119,6 @@ class AccountApiTests(TestCase):
         data = {'username': 'newuser',
                 'email': 'newuser@tes.com',
                 'password': 'testpass',}
-        print(data, file=sys.stderr)
         response = self.client.post(SIGNUP_URL, data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['user']['username'], 'newuser')
