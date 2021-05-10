@@ -5,6 +5,7 @@ __pycache__/
 .pycharm_helpers/
 # C extensions
 *.so
+*.deb
 
 # vagrant settings
 .vagrant/
