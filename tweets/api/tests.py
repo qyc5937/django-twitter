@@ -2,7 +2,6 @@ from testing.testcases import TestCase
 from testing.testconstants import *
 from rest_framework.test import APIClient
 from tweets.models import Tweet
-import sys
 
 class TweetApiTests(TestCase):
 
