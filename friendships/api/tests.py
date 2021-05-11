@@ -9,8 +9,6 @@ import logging
 class FriendshipApiTests(TestCase):
 
     def setUp(self):
-        # anonymous login client
-        self.anonymous_client = APIClient()
         self.user1 = self.create_user(TEST_USER, TEST_EMAIL)
         self.user2 = self.create_user('user2')
         self.user3 = self.create_user('user3')

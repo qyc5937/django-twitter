@@ -6,8 +6,6 @@ from tweets.models import Tweet
 class TweetApiTests(TestCase):
 
     def setUp(self):
-        #anonymous login client
-        self.anonymous_client = APIClient()
         self.user1 = self.create_user(TEST_USER, TEST_EMAIL)
         self.user2 = self.create_user('user2')
         self.user1_tweets = [

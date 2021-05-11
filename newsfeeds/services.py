@@ -9,9 +9,11 @@ class NewsFeedService(object):
     Fan out a tweet onto the newfeeds timelines of all followers
     '''
     @classmethod
-    def fan_out_to_followers(cls, tweet, user):
-        followers = FriendshipService.get_followers(user)
+    def fan_out_to_followers(cls, tweet):
+        followers = FriendshipService.get_followers(tweet.user)
         newsfeeds = [NewsFeed(tweet=tweet,user=follower,created_at=tweet.created_at) for follower in followers]
+        #should be able to see own posts
+        newsfeeds.append(NewsFeed(tweet=tweet,user=tweet.user,created_at=tweet.created_at))
         NewsFeed.objects.bulk_create(newsfeeds)
 
     '''
@@ -19,7 +21,7 @@ class NewsFeedService(object):
     '''
     @classmethod
     def populate_newsfeed_for_friendship(cls, friendship):
-        logging.error(friendship)
+#        logging.error(friendship)
         from_user, to_user = friendship.from_user, friendship.to_user
         newsfeeds = [
             NewsFeed(tweet=tweet, user=from_user,created_at=tweet.created_at)
@@ -33,7 +35,7 @@ class NewsFeedService(object):
     '''
     @classmethod
     def update_newsfeed_for_unfollow(cls,friendship):
-        logging.error(friendship.from_user_id)
+ #       logging.error(friendship.from_user_id)
         from_user, to_user = friendship.from_user_id, friendship.to_user_id
         tweets = Tweet.objects.filter(user_id=to_user)
         NewsFeed.objects.filter(user_id=from_user,tweet__user__tweet__in=tweets).delete()
