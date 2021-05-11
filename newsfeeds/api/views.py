@@ -1,19 +1,23 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from tweets.models import Tweet
-from tweets.api.serializers import TweetSerializer, TweetSerializerForCreate
-from newsfeeds.services import NewsFeedService
+from rest_framework.status import HTTP_200_OK
+from newsfeeds.models import NewsFeed
+from newsfeeds.api.serializers import NewsfeedSerializer
 
-class TweetViewSet(viewsets.GenericViewSet):
+class NewsFeedViewSet(viewsets.GenericViewSet):
 
     '''
     API Endpoints for creating and listing tweets
     '''
 
-    serializer_class = TweetSerializerForCreate
+    serializer_class = NewsfeedSerializer
+    permission_classes = [IsAuthenticated]
 
-
+    def list(self, request):
+        newsfeeds = NewsFeed.objects.filter(user_id=self.request.user)
+        return Response({'newsfeed': NewsfeedSerializer(newsfeeds, many=True).data}, status=HTTP_200_OK)
+'''
     def create(self, request):
         serialzier = TweetSerializerForCreate(
             data=request.data,
@@ -28,8 +32,6 @@ class TweetViewSet(viewsets.GenericViewSet):
             }, status=400)
 
         tweet = serialzier.save()
-        #fan out to followers
-        NewsFeedService.fan_out_to_followers(tweet,tweet.user)
         return Response(TweetSerializer(tweet).data, status=201)
 
 
@@ -46,4 +48,5 @@ class TweetViewSet(viewsets.GenericViewSet):
             user_id=request.query_params['user_id']
         ).order_by('-created_at')
         serializer = TweetSerializer(tweets, many=True)
-        return Response({"tweets": serializer.data})
+        r
+'''
