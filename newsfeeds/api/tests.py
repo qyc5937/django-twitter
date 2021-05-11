@@ -4,7 +4,7 @@ from rest_framework.test import APIClient
 from rest_framework.status import *
 import logging
 class NewsFeedApiTests(TestCase):
-#    reset_sequences = True
+
     #initial setup
     def setUp(self):
         self.users = [
