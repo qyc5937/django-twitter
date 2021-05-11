@@ -23,3 +23,9 @@ class TweetSerializerForCreate(serializers.ModelSerializer):
         content = validated_data['content']
         tweet = Tweet.objects.create(user=user, content=content)
         return tweet
+
+class TweetSerializerForNewsfeed(serializers.ModelSerializer):
+
+    class Meta:
+        model = Tweet
+        fields = ('id','content',)

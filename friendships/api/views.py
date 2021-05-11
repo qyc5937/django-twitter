@@ -12,6 +12,7 @@ from friendships.api.serializers import (
     FollowingSerializer,
     FriendshipSerializerForCreate,
 )
+from newsfeeds.services import NewsFeedService
 import logging
 
 class FriendshipViewSet(viewsets.GenericViewSet):
@@ -62,6 +63,8 @@ class FriendshipViewSet(viewsets.GenericViewSet):
                 "error": serializer.errors,
             }, HTTP_400_BAD_REQUEST)
         friendship = serializer.save()
+        #populate newsfeed timeline for new friendship
+        NewsFeedService.populate_newsfeed_for_friendship(friendship)
         return Response(
             FriendshipSerializerForCreate(friendship).data,
             status=HTTP_201_CREATED
@@ -77,7 +80,10 @@ class FriendshipViewSet(viewsets.GenericViewSet):
                 "message": "You cannot unfollow yourself."
             }, status=HTTP_400_BAD_REQUEST)
         friendship = Friendship.objects.filter(from_user=request.user,to_user_id=pk)
+        #update timeline for the deleted following
+        NewsFeedService.update_newsfeed_for_unfollow(friendship[0])
         deleted, _ = friendship.delete()
+
         return Response({
             "success": True,
             "deleted": deleted
