@@ -29,7 +29,7 @@ class TweetViewSet(viewsets.GenericViewSet):
 
         tweet = serialzier.save()
         #fan out to followers
-        NewsFeedService.fan_out_to_followers(tweet,tweet.user)
+        NewsFeedService.fan_out_to_followers(tweet)
         return Response(TweetSerializer(tweet).data, status=201)
 
 

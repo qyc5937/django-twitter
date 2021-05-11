@@ -81,7 +81,8 @@ class FriendshipViewSet(viewsets.GenericViewSet):
             }, status=HTTP_400_BAD_REQUEST)
         friendship = Friendship.objects.filter(from_user=request.user,to_user_id=pk)
         #update timeline for the deleted following
-        NewsFeedService.update_newsfeed_for_unfollow(friendship[0])
+        if friendship:
+            NewsFeedService.update_newsfeed_for_unfollow(friendship[0])
         deleted, _ = friendship.delete()
 
         return Response({

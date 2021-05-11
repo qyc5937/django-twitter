@@ -5,7 +5,6 @@ from tweets.models import Tweet
 from rest_framework.test import APIClient
 
 class TestCase(DjangoTestCase):
-
     def create_user(self, username, email=None, password=None):
         if password is None:
             password = TEST_PASSWORD
@@ -35,3 +34,9 @@ class TestCase(DjangoTestCase):
     def get_num_followings(self, client, user):
         return len(client.get(FRIENDSHIP_FOLLOWINGS_API.format(user.id)).data)
 
+    @property
+    def anonymous_client(self):
+        if hasattr(self, '_anonymous_client'):
+            return self._anonymous_client
+        self._anonymous_client = APIClient()
+        return self._anonymous_client

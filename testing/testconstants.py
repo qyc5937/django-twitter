@@ -21,3 +21,6 @@ FRIENDSHIP_FOLLOWINGS_API = '/api/friendships/{}/followings/'
 FRIENDSHIP_FOLLOWERS_API = '/api/friendships/{}/followers/'
 FRIENDSHIP_FOLLOW_API = '/api/friendships/{}/follow/'
 FRIENDSHIP_UNFOLLOW_API = '/api/friendships/{}/unfollow/'
+
+#newsfeed api URL
+NEWSFEED_LIST_API = '/api/newsfeeds/'
