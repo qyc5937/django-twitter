@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from tweets.models import Tweet
 from tweets.api.serializers import TweetSerializer, TweetSerializerForCreate
 from newsfeeds.services import NewsFeedService
@@ -25,12 +26,12 @@ class TweetViewSet(viewsets.GenericViewSet):
                "success": False,
                "message": "Please check input.",
                "errors": serialzier.errors,
-            }, status=400)
+            }, status=HTTP_400_BAD_REQUEST)
 
         tweet = serialzier.save()
         #fan out to followers
         NewsFeedService.fan_out_to_followers(tweet)
-        return Response(TweetSerializer(tweet).data, status=201)
+        return Response(TweetSerializer(tweet).data, status=HTTP_201_CREATED)
 
 
     def get_permissions(self):
@@ -40,7 +41,7 @@ class TweetViewSet(viewsets.GenericViewSet):
 
     def list(self, request):
         if 'user_id' not in request.query_params:
-            return Response('Invalid user_id', status=400)
+            return Response('Invalid user_id', status=HTTP_400_BAD_REQUEST)
 
         tweets = Tweet.objects.filter(
             user_id=request.query_params['user_id']
