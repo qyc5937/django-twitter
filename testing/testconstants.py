@@ -14,6 +14,7 @@ SIGNUP_URL = '/api/accounts/signup/'
 
 #tweet api URL
 TWEET_LIST_API = '/api/tweets/'
+TWEET_RETRIEVE_API = '/api/tweets/{}/'
 TWEET_CREATE_API = '/api/tweets/'
 
 #friendship api URL
