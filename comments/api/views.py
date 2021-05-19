@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.status import *
 from comments.api.serializers import CommentSerializerForCreate, CommentSerializer
 from comments.models import Comment
-import logging
+from utils.decorators import required_params
 
 class CommentViewSet(viewsets.GenericViewSet):
 
@@ -13,7 +13,7 @@ class CommentViewSet(viewsets.GenericViewSet):
     '''
 
     serializer_class = CommentSerializerForCreate
-
+    queryset = Comment.objects.all()
 
     def create(self, request):
         data = {
@@ -41,14 +41,8 @@ class CommentViewSet(viewsets.GenericViewSet):
             return [AllowAny()]
         return [IsAuthenticated()]
 
+    @required_params(params=['tweet_id'])
     def list(self, request):
-        if 'tweet_id' not in request.query_params:
-            return Response({
-                "success": False,
-                "message": 'Invalid tweet_id',
-            }, status=HTTP_400_BAD_REQUEST
-            )
-
         comments = Comment.objects.filter(
             tweet_id=request.query_params['tweet_id']
         ).order_by('-created_at')

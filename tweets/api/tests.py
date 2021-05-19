@@ -1,8 +1,8 @@
 from testing.testcases import TestCase
 from testing.testconstants import *
-from rest_framework.test import APIClient
 from tweets.models import Tweet
-
+from utils.constants import *
+import logging
 class TweetApiTests(TestCase):
 
     def setUp(self):
@@ -64,3 +64,28 @@ class TweetApiTests(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data['user']['id'], self.user1.id)
         self.assertEqual(Tweet.objects.count(),tweet_count+1)
+
+    def test_retrieve_api(self):
+        test_tweet = self.user1_tweets[0]
+        logging.error(TWEET_RETRIEVE_API.format(test_tweet.id))
+        #retrieve with no comments
+        response = self.auth_client.get(TWEET_RETRIEVE_API.format(test_tweet.id))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['comments']),0)
+
+        data = {'tweet_id': test_tweet.id}
+        #create comments
+        for i in range(12):
+            data['content'] = 'comment # {} on tweet {}'.format(i, test_tweet.id)
+            self.auth_client.post(COMMENT_CREATE_API, data=data)
+
+        #get default comments
+        response = self.auth_client.get(TWEET_RETRIEVE_API.format(test_tweet.id))
+        self.assertEqual(len(response.data['comments']),DEFAULT_COMMENT_DISPLAY_NUM)
+        #get all comments
+        response = self.auth_client.get(TWEET_RETRIEVE_API.format(test_tweet.id), data={"with_all_comments": True})
+        self.assertEqual(len(response.data['comments']),12)
+        #get preview
+        response = self.auth_client.get(TWEET_RETRIEVE_API.format(test_tweet.id), data={"with_preview_comments": True})
+        self.assertEqual(len(response.data['comments']), PREVIEW_COMMENT_DISPLAY_NUM)
+
