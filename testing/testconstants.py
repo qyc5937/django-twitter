@@ -29,3 +29,5 @@ NEWSFEED_LIST_API = '/api/newsfeeds/'
 #comments api URL
 COMMENT_LIST_API = '/api/comments/'
 COMMENT_CREATE_API = '/api/comments/'
+COMMENT_DESTROY_API = '/api/comments/{}/'
+COMMENT_UPDATE_API = '/api/comments/{}/'

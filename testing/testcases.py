@@ -2,6 +2,7 @@ from django.test import TestCase as DjangoTestCase
 from django.contrib.auth.models import User
 from testing.testconstants import *
 from tweets.models import Tweet
+from comments.models import Comment
 from rest_framework.test import APIClient
 
 class TestCase(DjangoTestCase):
@@ -16,6 +17,12 @@ class TestCase(DjangoTestCase):
         if content is None:
             content = 'default tweet'
         return Tweet.objects.create(user=user, content=content)
+
+    #only allow creating comment on tweets for now
+    def create_comment(self, tweet_id, user_id, content=None):
+        if content is None:
+            content = "default comment"
+        return Comment.objects.create(tweet_id=tweet_id, user_id=user_id, content=content)
 
     def login_user(self, username, password=None):
         if password is None:
