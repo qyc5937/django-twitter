@@ -1,6 +1,5 @@
 from testing.testcases import TestCase
 from testing.testconstants import *
-from rest_framework.test import APIClient
 from rest_framework.status import *
 import logging
 class NewsFeedApiTests(TestCase):
