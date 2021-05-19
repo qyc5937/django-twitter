@@ -12,10 +12,10 @@ class TestCase(DjangoTestCase):
             email = f'{username}@{TEST_DOMAIN}'
         return User.objects.create_user(username, email, password)
 
-    def create_tweet(self, username, content=None):
+    def create_tweet(self, user, content=None):
         if content is None:
             content = 'default tweet'
-        return Tweet.objects.create(user=username, content=content)
+        return Tweet.objects.create(user=user, content=content)
 
     def login_user(self, username, password=None):
         if password is None:

@@ -24,3 +24,7 @@ FRIENDSHIP_UNFOLLOW_API = '/api/friendships/{}/unfollow/'
 
 #newsfeed api URL
 NEWSFEED_LIST_API = '/api/newsfeeds/'
+
+#comments api URL
+COMMENT_LIST_API = '/api/comments/'
+COMMENT_CREATE_API = '/api/comments/'

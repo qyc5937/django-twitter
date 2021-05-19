@@ -16,8 +16,13 @@ class CommentViewSet(viewsets.GenericViewSet):
 
 
     def create(self, request):
+        data = {
+            'user_id': request.user.id,
+            'tweet_id': request.data['tweet_id'],
+            'content': request.data['content'],
+        }
         serialzier = CommentSerializerForCreate(
-            data=request.data,
+            data=data,
             context={'request': request},
         )
 
@@ -38,10 +43,17 @@ class CommentViewSet(viewsets.GenericViewSet):
 
     def list(self, request):
         if 'tweet_id' not in request.query_params:
-            return Response('Invalid tweet_id', status=HTTP_400_BAD_REQUEST)
+            return Response({
+                "success": False,
+                "message": 'Invalid tweet_id',
+            }, status=HTTP_400_BAD_REQUEST
+            )
 
         comments = Comment.objects.filter(
             tweet_id=request.query_params['tweet_id']
         ).order_by('-created_at')
         serializer = CommentSerializer(comments, many=True)
-        return Response({"comments": serializer.data}, status=HTTP_200_OK)
+        return Response({
+            "success": True,
+            "comments": serializer.data,
+        }, status=HTTP_200_OK)
