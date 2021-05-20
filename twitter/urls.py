@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.conf import settings
 from django.urls import include, path
 from rest_framework import routers
 from accounts.api import views
@@ -22,3 +23,9 @@ urlpatterns = [
                               namespace='rest_framework')
          ),
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns.append(
+        path('__debug__/', include(debug_toolbar.urls))
+    )

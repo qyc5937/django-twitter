@@ -21,6 +21,26 @@ class CommentApiTests(TestCase):
             for i in range(5)
         ]
 
+    def test_list_api(self):
+
+        #list with no tweet_id
+        response = self.anonymous_client.get(COMMENT_LIST_API)
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+
+        data = {"tweet_id": self.tweets[0].id}
+        #list with no comments
+        response = self.anonymous_client.get(COMMENT_LIST_API, data=data)
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(len(response.data['comments']),0)
+
+        #comments listed in reverse chronoical order
+        self.create_comment(self.tweets[0].id, self.users[0].id, 'test comment 1')
+        self.create_comment(self.tweets[0].id, self.users[1].id, 'test comment 2')
+
+        response = self.anonymous_client.get(COMMENT_LIST_API, data=data)
+        self.assertEqual(len(response.data['comments']),2)
+        self.assertEqual(response.data['comments'][0]['content'], 'test comment 2')
+
     def test_destroy_api(self):
 
         comment = self.create_comment(user_id=self.users[1].id, tweet_id=self.tweets[0].id)
