@@ -1,11 +1,15 @@
-from django.test import TestCase as DjangoTestCase
 from django.contrib.auth.models import User
-from testing.testconstants import *
-from tweets.models import Tweet
-from comments.models import Comment
+from django.test import TestCase as DjangoTestCase
 from rest_framework.test import APIClient
 
+from comments.models import Comment
+from likes.models import Like
+from testing.testconstants import *
+from tweets.models import Tweet
+
+
 class TestCase(DjangoTestCase):
+
     def create_user(self, username, email=None, password=None):
         if password is None:
             password = TEST_PASSWORD
@@ -23,6 +27,9 @@ class TestCase(DjangoTestCase):
         if content is None:
             content = "default comment"
         return Comment.objects.create(tweet_id=tweet_id, user_id=user_id, content=content)
+
+    def create_like(self, content_type, object_id, user):
+        return Like.objects.create(content_type=content_type, object_id=object_id, user=user)
 
     def login_user(self, username, password=None):
         if password is None:

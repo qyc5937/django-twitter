@@ -1,8 +1,10 @@
+from rest_framework.status import *
+
+from comments.models import Comment
 from testing.testcases import TestCase
 from testing.testconstants import *
-from rest_framework.status import *
-from comments.models import Comment
-import logging
+
+
 class CommentApiTests(TestCase):
 
     #initial setup
