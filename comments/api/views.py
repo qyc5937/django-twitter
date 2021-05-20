@@ -72,7 +72,9 @@ class CommentViewSet(viewsets.GenericViewSet):
     def list(self, request):
 
         queryset = self.get_queryset()
-        comments = self.filter_queryset(queryset).prefetch_related('user').order_by('-created_at')
+        comments = self.filter_queryset(queryset)\
+            .prefetch_related('user')\
+            .order_by('-created_at')
         serializer = CommentSerializer(comments, many=True)
         return Response({
             "success": True,
