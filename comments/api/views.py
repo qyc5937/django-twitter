@@ -23,8 +23,8 @@ class CommentViewSet(viewsets.GenericViewSet):
     def create(self, request):
         data = {
             'user_id': request.user.id,
-            'tweet_id': request.data['tweet_id'],
-            'content': request.data['content'],
+            'tweet_id': request.data.get('tweet_id'),
+            'content': request.data.get('content'),
         }
         serialzier = CommentSerializerForCreate(
             data=data,
@@ -70,7 +70,6 @@ class CommentViewSet(viewsets.GenericViewSet):
 
     @required_params(params=['tweet_id'])
     def list(self, request):
-
         queryset = self.get_queryset()
         comments = self.filter_queryset(queryset)\
             .prefetch_related('user')\
