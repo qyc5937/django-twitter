@@ -31,3 +31,7 @@ COMMENT_LIST_API = '/api/comments/'
 COMMENT_CREATE_API = '/api/comments/'
 COMMENT_DESTROY_API = '/api/comments/{}/'
 COMMENT_UPDATE_API = '/api/comments/{}/'
+
+#like api URL
+LIKE_CREATE_API = '/api/likes/'
+LIKE_CANCEL_API = '/api/likes/cancel/'
