@@ -21,6 +21,7 @@ class LikeViewSet(viewsets.GenericViewSet):
     queryset = Like.objects.all()
     permission_classes = [IsAuthenticated]
 
+    @required_params(request_attr='data', params=['content_type', 'object_id'])
     def create(self, request):
         serialzier = LikeSerializerForCreate(
             data=request.data,

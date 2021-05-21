@@ -19,7 +19,7 @@ class LikeApiTests(TestCase):
         self.tweet=self.create_tweet(user=self.users[0])
         self.comment=self.create_comment(user_id=self.users[1].id,tweet_id=self.tweet.id)
 
-    def test_create_api(self):
+    def test_create_like_api(self):
 
         #anonymous create
         data = {"content_type": "tweet", "object_id": self.tweet.id}
@@ -52,14 +52,15 @@ class LikeApiTests(TestCase):
 
         #like comment
         data['content_type'] = 'comment'
+        data['object_id'] = self.comment.id
         response = self.clients[0].post(LIKE_CREATE_API, data=data)
         self.assertEqual(response.status_code, HTTP_201_CREATED)
         self.assertEqual(Like.objects.all().count(), 2)
 
-    def test_cancel_api(self):
+    def test_cancel_like_api(self):
 
-        tweet_like = self.create_like(content_type='tweet', object_id=self.tweet.id, user=self.users[1])
-        comment_like = self.create_like(content_type='comment', object_id=self.comment.id, user=self.users[0])
+        tweet_like = self.create_like(self.tweet, user=self.users[1])
+        comment_like = self.create_like(self.comment, user=self.users[0])
 
         data = {"content_type": "tweet"}
 

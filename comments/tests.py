@@ -28,7 +28,7 @@ class CommentModelTests(TestCase):
     def test_comment_like_set(self):
 
         like_count = Like.objects.all().count()
-        self.create_like(content_type=ContentType.objects.get_for_model(self.test_comment), object_id=self.test_comment.id, user=self.users[1])
+        self.create_like(target=self.test_comment, user=self.users[1])
         self.assertEqual(Like.objects.all().count(), like_count+1)
         self.assertEqual(self.test_comment.like_set.count(),1)
         self.assertEqual(self.test_comment.like_set[0].user_id, self.users[1].id)

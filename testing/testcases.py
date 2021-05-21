@@ -29,16 +29,10 @@ class TestCase(DjangoTestCase):
             content = "default comment"
         return Comment.objects.create(tweet_id=tweet_id, user_id=user_id, content=content)
 
-    def create_like(self, content_type, object_id, user):
-
-        content_class = None
-        if content_type == "tweet":
-            content_class = Tweet
-        if content_type == "comment":
-            content_class = Comment
+    def create_like(self, target, user):
         return Like.objects.create(
-            content_type=ContentType.objects.get_for_model(content_class),
-            object_id=object_id,
+            content_type=ContentType.objects.get_for_model(target.__class__),
+            object_id=target.id,
             user=user,
         )
 
