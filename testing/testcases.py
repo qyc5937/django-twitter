@@ -6,6 +6,7 @@ from comments.models import Comment
 from likes.models import Like
 from testing.testconstants import *
 from tweets.models import Tweet
+from django.contrib.contenttypes.models import ContentType
 
 
 class TestCase(DjangoTestCase):
@@ -29,7 +30,17 @@ class TestCase(DjangoTestCase):
         return Comment.objects.create(tweet_id=tweet_id, user_id=user_id, content=content)
 
     def create_like(self, content_type, object_id, user):
-        return Like.objects.create(content_type=content_type, object_id=object_id, user=user)
+
+        content_class = None
+        if content_type == "tweet":
+            content_class = Tweet
+        if content_type == "comment":
+            content_class = Comment
+        return Like.objects.create(
+            content_type=ContentType.objects.get_for_model(content_class),
+            object_id=object_id,
+            user=user,
+        )
 
     def login_user(self, username, password=None):
         if password is None:
