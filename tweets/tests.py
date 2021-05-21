@@ -41,7 +41,7 @@ class TweetTests(TestCase):
     def test_tweet_like_set(self):
 
         like_count = Like.objects.all().count()
-        self.create_like(content_type=ContentType.objects.get_for_model(self.tweets[0]), object_id=self.tweets[0].id, user=self.users[1])
+        self.create_like(target=self.tweets[0], user=self.users[1])
         self.assertEqual(Like.objects.all().count(), like_count+1)
         self.assertEqual(self.tweets[0].like_set.count(),1)
         self.assertEqual(self.tweets[0].like_set[0].user_id, self.users[1].id)
