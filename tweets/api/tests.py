@@ -1,6 +1,7 @@
 from testing.testcases import TestCase
 from testing.testconstants import *
 from tweets.models import Tweet
+from comments.models import Comment
 from utils.constants import *
 import logging
 class TweetApiTests(TestCase):
@@ -8,6 +9,7 @@ class TweetApiTests(TestCase):
     def setUp(self):
         self.user1 = self.create_user(TEST_USER, TEST_EMAIL)
         self.user2 = self.create_user('user2')
+        self.user3 = self.create_user('user3')
         self.user1_tweets = [
             self.create_tweet(self.user1)
             for i in range(6)
@@ -39,6 +41,20 @@ class TweetApiTests(TestCase):
         #test ordering
         self.assertEqual(response.data['tweets'][0]['id'], self.user2_tweets[-1].id)
         self.assertEqual(response.data['tweets'][-1]['id'], self.user2_tweets[0].id)
+
+        #test likes
+        self.assertEqual(self.user1_tweets[0].like_set.count(), 0)
+        self.create_like(self.user1_tweets[0], self.user2)
+        self.assertEqual(self.user1_tweets[0].like_set.count(), 1)
+        self.create_like(self.user1_tweets[0], self.user3)
+        self.assertEqual(self.user1_tweets[0].like_set.count(), 2)
+
+        #check likes in response data
+        response = self.anonymous_client.get(TWEET_LIST_API, {
+            'user_id': self.user1.id
+        })
+
+        self.assertEqual(len(response.data['tweets'][-1]['likes']),2)
 
     def test_create_api(self):
         data= {'content': 'test content'}
@@ -89,3 +105,19 @@ class TweetApiTests(TestCase):
         response = self.auth_client.get(TWEET_RETRIEVE_API.format(test_tweet.id), data={"with_preview_comments": True})
         self.assertEqual(len(response.data['comments']), PREVIEW_COMMENT_DISPLAY_NUM)
 
+        #test likes
+        self.assertEqual(self.user1_tweets[0].like_set.count(), 0)
+        self.create_like(self.user1_tweets[0], self.user2)
+        self.assertEqual(self.user1_tweets[0].like_set.count(), 1)
+        self.create_like(self.user1_tweets[0], self.user3)
+        self.assertEqual(self.user1_tweets[0].like_set.count(), 2)
+
+        self.comments = Comment.objects.all()
+        #create likes on comment
+        self.create_like(self.comments[0], self.user3)
+        self.assertEqual(self.comments[0].like_set.count(),1)
+        response = self.auth_client.get(TWEET_RETRIEVE_API.format(test_tweet.id), data={"with_all_comments": True})
+
+        #check likes info in response data.
+        self.assertEqual(len(response.data['likes']),2)
+        self.assertEqual(len(response.data['comments'][0]['likes']),1)

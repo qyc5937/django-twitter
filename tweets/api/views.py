@@ -6,7 +6,7 @@ from tweets.models import Tweet
 from tweets.api.serializers import (
     TweetSerializer,
     TweetSerializerForCreate,
-    TweetSerializerWithComments,
+    TweetSerializersWithCommentsAndLikes,
 )
 from newsfeeds.services import NewsFeedService
 from utils.decorators import required_params
@@ -50,12 +50,12 @@ class TweetViewSet(viewsets.GenericViewSet):
         tweets = Tweet.objects.filter(
             user_id=request.query_params['user_id']
         ).order_by('-created_at')
-        serializer = TweetSerializer(tweets, many=True)
+        serializer = TweetSerializersWithCommentsAndLikes(tweets, many=True)
         return Response({"tweets": serializer.data})
 
     def retrieve(self, request, *args, **kwargs):
         tweet = self.get_object()
-        tweet_with_comments = TweetSerializerWithComments(tweet).data
+        tweet_with_comments = TweetSerializersWithCommentsAndLikes(tweet).data
         all_comments = tweet_with_comments['comments'][:]
         tweet_with_comments['comments'] = all_comments[:DEFAULT_COMMENT_DISPLAY_NUM]
         if 'with_all_comments' in request.query_params and request.query_params['with_all_comments']:
