@@ -6,6 +6,7 @@ from comments.api.serializers import (
     CommentSerializerForCreate,
     CommentSerializer,
     CommentSerializerForUpdate,
+    CommentSerializerWithLikes,
 )
 from comments.models import Comment
 from utils.decorators import required_params
@@ -74,7 +75,11 @@ class CommentViewSet(viewsets.GenericViewSet):
         comments = self.filter_queryset(queryset)\
             .prefetch_related('user')\
             .order_by('-created_at')
-        serializer = CommentSerializer(comments, many=True)
+        serializer = CommentSerializerWithLikes(
+            comments,
+            context={'request': request},
+            many=True,
+        )
         return Response({
             "success": True,
             "comments": serializer.data,

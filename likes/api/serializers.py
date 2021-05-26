@@ -5,7 +5,6 @@ from likes.models import Like
 from comments.models import Comment
 from tweets.models import Tweet
 from accounts.api.serializers import UserSerializer
-from comments.api.serializers import CommentSerializer
 
 class LikeSerializer(serializers.ModelSerializer):
 
