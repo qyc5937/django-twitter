@@ -21,7 +21,7 @@ class TweetApiTests(TestCase):
             for i in range(4)
         ]
 
-    def test_list_api(self):
+    def test_tweet_list_api(self):
         #test anonymous user
         response = self.anonymous_client.get(TWEET_LIST_API)
         self.assertEqual(response.status_code, 400)
@@ -42,21 +42,33 @@ class TweetApiTests(TestCase):
         self.assertEqual(response.data['tweets'][0]['id'], self.user2_tweets[-1].id)
         self.assertEqual(response.data['tweets'][-1]['id'], self.user2_tweets[0].id)
 
-        #test likes
+
+    def test_tweet_likes(self):
+        # test likes
         self.assertEqual(self.user1_tweets[0].like_set.count(), 0)
         self.create_like(self.user1_tweets[0], self.user2)
         self.assertEqual(self.user1_tweets[0].like_set.count(), 1)
         self.create_like(self.user1_tweets[0], self.user3)
         self.assertEqual(self.user1_tweets[0].like_set.count(), 2)
 
-        #check likes in response data
+        # check likes in response data
         response = self.anonymous_client.get(TWEET_LIST_API, {
             'user_id': self.user1.id
         })
 
-        self.assertEqual(len(response.data['tweets'][-1]['likes']),2)
+        self.assertEqual(len(response.data['tweets'][-1]['likes']), 2)
+        comment = self.create_comment(tweet_id=self.user1_tweets[0].id,user_id=self.user2.id)
+        self.comments = Comment.objects.all()
+        # create likes on comment
+        self.create_like(self.comments[0], self.user3)
+        self.assertEqual(self.comments[0].like_set.count(), 1)
+        response = self.auth_client.get(TWEET_RETRIEVE_API.format(self.user1_tweets[0].id), data={"with_all_comments": True})
 
-    def test_create_api(self):
+        # check likes info in response data.
+        self.assertEqual(len(response.data['likes']), 2)
+        self.assertEqual(len(response.data['comments'][0]['likes']), 1)
+
+    def test_tweet_create_api(self):
         data= {'content': 'test content'}
         # no login
         response = self.anonymous_client.post(TWEET_CREATE_API, data)
@@ -70,7 +82,7 @@ class TweetApiTests(TestCase):
         response = self.auth_client.post(TWEET_CREATE_API,data)
         self.assertEqual(response.status_code, 400)
         #content too long
-        data['content'] ='asdkfjasdkfjaklsdfjlkasdjfl;kasdj;flajs;ldkfjkas;ldfjlkasdjf;laskjdfljasdlfjaskldfj;lasjdflaskjdf;lfkjasdlkfjlasdjfkl;asdjf;lkasdj;flajsdkl;fjakls;dfj;lasdjf;lkasjd;flkjasd;klfja;slkdfj;lkasdjf;klasdjf;lkasj;flkasjdfkasdjfklasdjf;lkasdjflkasdjfklasdjfklajsdlkfjsakldfjasdlkfjsadlkfjaslkdjfsldak;jlf1'
+        data['content'] ='abcd' * 100
         response = self.auth_client.post(TWEET_CREATE_API,data)
         self.assertEqual(response.status_code, 400)
         #normal post
@@ -81,7 +93,7 @@ class TweetApiTests(TestCase):
         self.assertEqual(response.data['user']['id'], self.user1.id)
         self.assertEqual(Tweet.objects.count(),tweet_count+1)
 
-    def test_retrieve_api(self):
+    def test_tweet_retrieve_api(self):
         test_tweet = self.user1_tweets[0]
         logging.error(TWEET_RETRIEVE_API.format(test_tweet.id))
         #retrieve with no comments
@@ -105,19 +117,3 @@ class TweetApiTests(TestCase):
         response = self.auth_client.get(TWEET_RETRIEVE_API.format(test_tweet.id), data={"with_preview_comments": True})
         self.assertEqual(len(response.data['comments']), PREVIEW_COMMENT_DISPLAY_NUM)
 
-        #test likes
-        self.assertEqual(self.user1_tweets[0].like_set.count(), 0)
-        self.create_like(self.user1_tweets[0], self.user2)
-        self.assertEqual(self.user1_tweets[0].like_set.count(), 1)
-        self.create_like(self.user1_tweets[0], self.user3)
-        self.assertEqual(self.user1_tweets[0].like_set.count(), 2)
-
-        self.comments = Comment.objects.all()
-        #create likes on comment
-        self.create_like(self.comments[0], self.user3)
-        self.assertEqual(self.comments[0].like_set.count(),1)
-        response = self.auth_client.get(TWEET_RETRIEVE_API.format(test_tweet.id), data={"with_all_comments": True})
-
-        #check likes info in response data.
-        self.assertEqual(len(response.data['likes']),2)
-        self.assertEqual(len(response.data['comments'][0]['likes']),1)
