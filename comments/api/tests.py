@@ -138,13 +138,13 @@ class CommentApiTests(TestCase):
         data['tweet_id'] = self.tweets[0].id
         data['content'] ='test content'
         response = self.clients[0].post(COMMENT_CREATE_API, data=data)
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
         self.assertEqual(Comment.objects.count(), comment_count+1)
         comment_count+=1
         #comment on someone else's tweet
         data['tweet_id'] = self.tweets[1].id
         response = self.clients[0].post(COMMENT_CREATE_API, data=data)
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
         self.assertEqual(Comment.objects.count(), comment_count+1)
         #no login create comment
         response = self.anonymous_client.post(COMMENT_CREATE_API, data=data)
