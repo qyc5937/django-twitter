@@ -11,7 +11,7 @@ from comments.api.serializers import (
 from comments.models import Comment
 from utils.decorators import required_params
 from comments.api.permissions import IsObjectOwner
-
+from inboxes.services import NotificationService
 
 class CommentViewSet(viewsets.GenericViewSet):
     '''
@@ -40,7 +40,9 @@ class CommentViewSet(viewsets.GenericViewSet):
             }, status=HTTP_400_BAD_REQUEST)
 
         comment = serialzier.save()
-        return Response()
+        #send out notifications
+        NotificationService.send_comment_notification(comment)
+        return Response(CommentSerializer(comment, context={'request': request}).data, status = HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
         comment = self.get_object()
@@ -60,6 +62,7 @@ class CommentViewSet(viewsets.GenericViewSet):
                 "errors": serializer.errors,
             }, status=HTTP_400_BAD_REQUEST)
         comment = serializer.save()
+
         return Response(CommentSerializer(comment).data, status=HTTP_200_OK)
 
     def get_permissions(self):

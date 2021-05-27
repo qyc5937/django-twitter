@@ -10,6 +10,7 @@ from likes.api.serializers import (
     LikeSerializerForCancel,
 )
 from utils.decorators import required_params
+from inboxes.services import NotificationService
 
 class LikeViewSet(viewsets.GenericViewSet):
 
@@ -35,6 +36,8 @@ class LikeViewSet(viewsets.GenericViewSet):
             }, status=HTTP_400_BAD_REQUEST)
 
         like = serialzier.save()
+        #send like notification
+        NotificationService.send_like_notificaion(like)
         return Response(LikeSerializer(like).data, status=HTTP_201_CREATED)
 
     @action(methods=['POST'], detail=False)

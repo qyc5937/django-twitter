@@ -37,10 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     #third party
     'rest_framework',
     'debug_toolbar',
     'django_filters',
+    'notifications',
+
     #project apps
     'accounts',
     'tweets',
