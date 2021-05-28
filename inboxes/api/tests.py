@@ -16,6 +16,68 @@ class InboxTest(TestCase):
         self.tweet=self.create_tweet(self.user_1)
         self.comment = self.create_comment(self.tweet.id,self.user_2.id)
 
+    def test_unread_count(self):
+
+        response = self.client_1.post(testconstants.NOTIFICATION_UNREAD_URL)
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        response = self.client_1.get(testconstants.NOTIFICATION_UNREAD_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['unread_count'],0)
+
+    def test_mark_all_as_unread(self):
+        self.assertEqual(self.client_1.get(testconstants.NOTIFICATION_UNREAD_URL).data['unread_count'], 0)
+        data = {
+            'tweet_id': self.tweet.id,
+            'content': "test content"
+        }
+        self.client_2.post(testconstants.COMMENT_CREATE_API, data=data)
+        self.assertEqual(self.client_1.get(testconstants.NOTIFICATION_UNREAD_URL).data['unread_count'], 1)
+        response = self.client_1.get(testconstants.NOTIFICATION_MARK_READ_URL)
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(self.client_1.get(testconstants.NOTIFICATION_UNREAD_URL).data['unread_count'], 1)
+        response = self.client_1.post(testconstants.NOTIFICATION_MARK_READ_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.client_1.get(testconstants.NOTIFICATION_UNREAD_URL).data['unread_count'], 0)
+
+    def test_update_api_notifications(self):
+        data = {
+            'tweet_id': self.tweet.id,
+            'content': "test content"
+        }
+        self.client_2.post(testconstants.COMMENT_CREATE_API, data=data)
+        self.assertEqual(self.client_1.get(testconstants.NOTIFICATION_UNREAD_URL).data['unread_count'], 1)
+        notification = self.user_1.notifications.first()
+
+        data = {
+            "id": notification.id,
+            "unread": False
+        }
+        response = self.client_1.post(testconstants.NOTIFICATION_UPDATE_URL.format(notification.id), data=data)
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        response = self.anonymous_client.put(testconstants.NOTIFICATION_UPDATE_URL.format(notification.id), data=data)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        #try to update someone else's notification
+        response = self.client_2.put(testconstants.NOTIFICATION_UPDATE_URL.format(notification.id), data=data)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        response = self.client_1.put(testconstants.NOTIFICATION_UPDATE_URL.format(notification.id), data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['unread'], False)
+
+        data['unread'] = True
+        response = self.client_1.put(testconstants.NOTIFICATION_UPDATE_URL.format(notification.id), data=data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['unread'], True)
+
+        #no unreead
+        del data['unread']
+
+        response = self.client_1.put(testconstants.NOTIFICATION_UPDATE_URL.format(notification.id), data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
     def test_comments_api_notifications(self):
 
         num_notifications = Notification.objects.all().count()
@@ -56,7 +118,6 @@ class InboxTest(TestCase):
         #comment like notification
         response = self.client_1.post(testconstants.LIKE_CREATE_API, data=data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        print(Notification.objects.all())
         self.assertEqual(Like.objects.all().count(), num_likes+2)
         self.assertEqual(Notification.objects.all().count(), num_notifications+2)
         data['content_type']  = "testtype"

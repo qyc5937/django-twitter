@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.status import *
 from functools import wraps
 
-def required_params(request_attr='query_params', params=None):
+def required_params(method='POST', params=None):
     '''
     decorator to check if artribtary number of require params are represent in a request
     '''
@@ -13,7 +13,7 @@ def required_params(request_attr='query_params', params=None):
 
         @wraps(view_func)
         def _wrapped_view(instance, request, *args, **kwargs):
-            data = getattr(request, request_attr)
+            data = getattr(request, 'query_params' if method == 'GET' else 'data')
             missing_params = [
                 param
                 for param in params

@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.test import TestCase as DjangoTestCase
 from rest_framework.test import APIClient
-
+from inboxes.services import NotificationService
 from comments.models import Comment
 from likes.models import Like
 from testing.testconstants import *
@@ -27,14 +27,16 @@ class TestCase(DjangoTestCase):
     def create_comment(self, tweet_id, user_id, content=None):
         if content is None:
             content = "default comment"
-        return Comment.objects.create(tweet_id=tweet_id, user_id=user_id, content=content)
+        comment = Comment.objects.create(tweet_id=tweet_id, user_id=user_id, content=content)
+        return comment
 
     def create_like(self, target, user):
-        return Like.objects.create(
+        like = Like.objects.create(
             content_type=ContentType.objects.get_for_model(target.__class__),
             object_id=target.id,
             user=user,
         )
+        return like
 
     def login_user(self, username, password=None):
         if password is None:
