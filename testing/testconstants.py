@@ -35,3 +35,8 @@ COMMENT_UPDATE_API = '/api/comments/{}/'
 #like api URL
 LIKE_CREATE_API = '/api/likes/'
 LIKE_CANCEL_API = '/api/likes/cancel/'
+
+#notification api URL
+NOTIFICATION_UNREAD_URL= '/api/notifications/unread-count/'
+NOTIFICATION_MARK_READ_URL = '/api/notifications/mark-all-as-read/'
+NOTIFICATION_UPDATE_URL= '/api/notifications/{}/'

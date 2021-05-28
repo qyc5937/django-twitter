@@ -22,7 +22,7 @@ class LikeViewSet(viewsets.GenericViewSet):
     queryset = Like.objects.all()
     permission_classes = [IsAuthenticated]
 
-    @required_params(request_attr='data', params=['content_type', 'object_id'])
+    @required_params(method='POST', params=['content_type', 'object_id'])
     def create(self, request):
         serialzier = LikeSerializerForCreate(
             data=request.data,
@@ -41,7 +41,7 @@ class LikeViewSet(viewsets.GenericViewSet):
         return Response(LikeSerializer(like).data, status=HTTP_201_CREATED)
 
     @action(methods=['POST'], detail=False)
-    @required_params(request_attr='data', params=['content_type', 'object_id'])
+    @required_params(method='POST', params=['content_type', 'object_id'])
     def cancel(self, request, *args, **kwargs):
         '''
         method use for unliking a tweet/comment

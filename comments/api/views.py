@@ -72,7 +72,7 @@ class CommentViewSet(viewsets.GenericViewSet):
             return [IsAuthenticated(), IsObjectOwner()]
         return [IsAuthenticated()]
 
-    @required_params(params=['tweet_id'])
+    @required_params(method='GET', params=['tweet_id'])
     def list(self, request):
         queryset = self.get_queryset()
         comments = self.filter_queryset(queryset)\
