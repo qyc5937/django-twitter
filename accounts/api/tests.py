@@ -1,6 +1,7 @@
 from testing.testcases import TestCase
 from testing.testconstants import *
 from rest_framework.test import APIClient
+from accounts.models import UserProfile
 
 
 class AccountApiTests(TestCase):
@@ -74,6 +75,8 @@ class AccountApiTests(TestCase):
 
     def test_signup(self):
 
+        num_profiles = UserProfile.objects.all().count()
+
         data ={
             'password': TEST_PASSWORD,
             'email': TEST_EMAIL
@@ -123,6 +126,11 @@ class AccountApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['user']['username'], 'newuser')
 
+        # make sure that user profile is created
+        self.assertEqual(UserProfile.objects.all().count(), num_profiles+1)
+        user_id = response.data['user']['id']
+        profile = UserProfile.objects.filter(user_id=user_id).first()
+        self.assertNotEqual(profile, None)
         #test user is logged in
         response = self.client.get(LOGIN_STATUS_URL)
         self.assertEqual(response.status_code, 200)
