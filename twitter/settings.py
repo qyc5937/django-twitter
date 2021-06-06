@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -129,7 +128,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
-
 STATIC_URL = '/static/'
 #STATIC_ROOT = '/code/static/'
 INTERNAL_IPS = ['10.0.2.2']
@@ -145,7 +143,13 @@ DATABASES = {
     }
 }
 
+
 try:
     from .local_settings import *
 except:
     pass
+
+DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
+AZURE_ACCOUNT_NAME = 'djangotwitter'
+AZURE_CONTAINER = 'media'
+AZURE_SSL = True
