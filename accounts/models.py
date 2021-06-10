@@ -6,7 +6,7 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
     avatar = models.FileField(null=True)
-    nickname = models.CharField(max_length=140)
+    nickname = models.CharField(max_length=140, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -21,6 +21,7 @@ def get_profile(user):
     profile, _ = UserProfile.objects.get_or_create(user=user)
     setattr(user, '_cached_user_profile', profile)
     return profile
+
 
 User.profile = property(get_profile)
 

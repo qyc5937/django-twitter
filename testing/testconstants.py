@@ -6,6 +6,9 @@ TEST_DOMAIN='test.com'
 TEST_CONTENT='test content'
 INVALID_USER_ID=9999
 
+#user profile api URL
+PROFILE_UPDATE_URL = '/api/profiles/{}/'
+
 #account api URL
 LOGIN_URL = '/api/accounts/login/'
 LOGOUT_URL = '/api/accounts/logout/'
