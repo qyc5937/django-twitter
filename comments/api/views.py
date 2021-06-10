@@ -10,7 +10,7 @@ from comments.api.serializers import (
 )
 from comments.models import Comment
 from utils.decorators import required_params
-from comments.api.permissions import IsObjectOwner
+from utils.permissions import IsObjectOwner
 from inboxes.services import NotificationService
 
 class CommentViewSet(viewsets.GenericViewSet):

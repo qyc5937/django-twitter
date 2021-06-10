@@ -4,7 +4,6 @@ from rest_framework.validators import ValidationError
 from accounts.api.serializers import UserSerializerForComment
 from comments.models import Comment
 from tweets.models import Tweet
-from likes.models import Like
 from likes.api.serializers import LikeSerializer
 from likes.services import LikeService
 

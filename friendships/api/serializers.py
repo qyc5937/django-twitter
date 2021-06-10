@@ -18,6 +18,7 @@ class FollowingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Friendship
         fields = ('user', 'created_at',)
+
 '''class FriendshipSerializer(serializers.ModelSerializer):
 
     user = UserSerializerForFriendship()
@@ -26,6 +27,7 @@ class FollowingSerializer(serializers.ModelSerializer):
         model = Friendship
         fields = ('id', 'from_user', 'to_user', 'created_at',)
 '''
+
 class FriendshipSerializerForCreate(serializers.ModelSerializer):
 
     from_user_id = serializers.IntegerField()

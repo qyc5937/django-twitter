@@ -1,30 +1,55 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers, exceptions
+from accounts.models import UserProfile
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email']
+        fields = ['id', 'username']
 
-class UserSerializerForTweet(serializers.HyperlinkedModelSerializer):
+
+class UserSerializerWithProfile(UserSerializer):
+
+    nickname = serializers.CharField(source='profile.nickname')
+    avatar_url = serializers.SerializerMethodField()
+
+    def get_avatar_url(self, obj):
+        return obj.profile.avatar.url if obj.profile.avatar else None
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'nickname', 'avatar_url',)
+
+
+
+class UserSerializerForTweet(UserSerializerWithProfile):
     class Meta:
         model = User
         fields = ['id', 'username']
 
-class UserSerializerForFriendship(UserSerializerForTweet):
+
+class UserSerializerForFriendship(UserSerializerWithProfile):
     pass
 
-class UserSerializerForNewsfeed(UserSerializerForTweet):
+
+class UserSerializerForNewsfeed(UserSerializerWithProfile):
     pass
 
-class UserSerializerForComment(UserSerializerForTweet):
+
+class UserSerializerForComment(UserSerializerWithProfile):
     pass
+
+
+class UserSerializerForLike(UserSerializerWithProfile):
+    pass
+
 
 class SignupSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=20, min_length=6)
     password = serializers.CharField(max_length=20, min_length=6)
     email = serializers.EmailField()
+
     class Meta:
         model = User
         fields = ('username', 'email', 'password')
@@ -51,6 +76,13 @@ class SignupSerializer(serializers.ModelSerializer):
         )
         return user
 
+
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
+
+
+class UserProfileSerializerForUpdate(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ('nickname', 'avatar',)
