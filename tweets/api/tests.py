@@ -1,6 +1,9 @@
 from testing.testcases import TestCase
+from tweets.constants import TWEET_PHOTO_MAX_NUM
 from testing.testconstants import *
-from tweets.models import Tweet
+from tweets.models import Tweet, TweetPhoto
+from django.core.files.uploadedfile import SimpleUploadedFile
+from rest_framework import status
 from comments.models import Comment
 from utils.constants import *
 import logging
@@ -24,13 +27,13 @@ class TweetApiTests(TestCase):
     def test_tweet_list_api(self):
         #test anonymous user
         response = self.anonymous_client.get(TWEET_LIST_API)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         #normal request
         response = self.anonymous_client.get(TWEET_LIST_API,{
             'user_id': self.user1.id
         })
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['tweets']), 6)
 
         response = self.anonymous_client.get(TWEET_LIST_API, {
@@ -76,20 +79,20 @@ class TweetApiTests(TestCase):
 
         # no content
         response = self.auth_client.post(TWEET_CREATE_API)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         #content too short
         data['content'] ='1'
         response = self.auth_client.post(TWEET_CREATE_API,data)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         #content too long
         data['content'] ='abcd' * 100
         response = self.auth_client.post(TWEET_CREATE_API,data)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         #normal post
         tweet_count = Tweet.objects.count()
         data['content'] = TEST_CONTENT
         response = self.auth_client.post(TWEET_CREATE_API, data)
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['user']['id'], self.user1.id)
         self.assertEqual(Tweet.objects.count(),tweet_count+1)
 
@@ -98,7 +101,7 @@ class TweetApiTests(TestCase):
         logging.error(TWEET_RETRIEVE_API.format(test_tweet.id))
         #retrieve with no comments
         response = self.auth_client.get(TWEET_RETRIEVE_API.format(test_tweet.id))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['comments']),0)
 
         data = {'tweet_id': test_tweet.id}
@@ -116,4 +119,54 @@ class TweetApiTests(TestCase):
         #get preview
         response = self.auth_client.get(TWEET_RETRIEVE_API.format(test_tweet.id), data={"with_preview_comments": True})
         self.assertEqual(len(response.data['comments']), PREVIEW_COMMENT_DISPLAY_NUM)
+
+    def test_tweet_create_with_photos(self):
+
+        def seek_files(files):
+            for file in files:
+                file.seek(0)
+
+        data = {
+            'content': 'a test tweet',
+            'files': [],
+        }
+        # empty files
+        response = self.auth_client.post(TWEET_CREATE_API, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(TweetPhoto.objects.count(), 0)
+
+        #:single photo
+        files = [
+            SimpleUploadedFile(
+                name=f'selfie{i}.jpg',
+                content=str.encode(f'selfie{i}'),
+                content_type='image/jpg',
+            )
+            for i in range(10)
+        ]
+        '''data['files'] = [SimpleUploadedFile(
+            name='testfile.jpg',
+            content=str.encode('test file'),
+            content_type='image/jpeg',
+        )]'''
+        data['files'] = [files[0]]
+        seek_files(files)
+        response = self.auth_client.post(TWEET_CREATE_API, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(TweetPhoto.objects.count(), 1)
+
+        #more than 9
+
+        data['files'] = files
+        seek_files(files)
+        response = self.auth_client.post(TWEET_CREATE_API, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(TweetPhoto.objects.count(), 1)
+        files.pop()
+        seek_files(files)
+        data['files'] = files
+        response = self.auth_client.post(TWEET_CREATE_API, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(TweetPhoto.objects.count(), TWEET_PHOTO_MAX_NUM+1)
+
 

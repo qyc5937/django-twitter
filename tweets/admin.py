@@ -1,5 +1,5 @@
 from django.contrib import admin
-from tweets.models import Tweet
+from tweets.models import Tweet, TweetPhoto
 
 @admin.register(Tweet)
 class TweetAdmin(admin.ModelAdmin):
@@ -10,3 +10,15 @@ class TweetAdmin(admin.ModelAdmin):
         'content',
     )
 
+@admin.register(TweetPhoto)
+class TweetPhoto(admin.ModelAdmin):
+    list_display = (
+        'tweet',
+        'user',
+        'file',
+        'status',
+        'is_deleted',
+        'created_at',
+    )
+    list_filter = ('status', 'is_deleted',)
+    date_hierarchy = 'created_at'

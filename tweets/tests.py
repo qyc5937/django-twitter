@@ -1,12 +1,11 @@
 from datetime import datetime, timedelta
 
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
 
 from likes.models import Like
 from testing.testcases import TestCase
-from tweets.models import Tweet
-
+from tweets.models import Tweet,TweetPhoto
+from tweets.constants import TweetPhotoStatus
 
 # Create your tests here.
 class TweetTests(TestCase):
@@ -46,4 +45,11 @@ class TweetTests(TestCase):
         self.assertEqual(self.tweets[0].like_set.count(),1)
         self.assertEqual(self.tweets[0].like_set[0].user_id, self.users[1].id)
 
-
+    def test_create_tweet_photo(self):
+        tweet_photo = TweetPhoto.objects.create(
+            user = self.users[0],
+            tweet = self.tweets[0],
+        )
+        self.assertEqual(tweet_photo.user.id, self.users[0].id)
+        self.assertEqual(tweet_photo.tweet.id, self.tweets[0].id)
+        self.assertEqual(tweet_photo.status, TweetPhotoStatus.PENDING)
