@@ -12,6 +12,7 @@ from friendships.api.serializers import (
     FollowingSerializer,
     FriendshipSerializerForCreate,
 )
+from friendships.api.paginations import FriendshipPagination
 from newsfeeds.services import NewsFeedService
 import logging
 
@@ -19,6 +20,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 
     queryset = User.objects.all()
     serializer_class = FriendshipSerializerForCreate
+    pagination_class = FriendshipPagination
     permission_classes = [permissions.IsAuthenticated]
 
     @action(methods=['GET'], detail=True, permission_classes=[AllowAny])
@@ -26,14 +28,26 @@ class FriendshipViewSet(viewsets.GenericViewSet):
         if not pk:
             return Response('Invalid user',HTTP_401_UNAUTHORIZED)
         friendships = Friendship.objects.filter(to_user_id=pk).order_by('-created_at')
-        return Response(FollowerSerializer(friendships,many=True).data, status=HTTP_200_OK)
+        page = self.paginate_queryset(friendships)
+        serializer = FollowerSerializer(
+            page,
+            many=True,
+            context={'request': request},
+        )
+        return self.get_paginated_response(serializer.data)
 
     @action(methods=['GET'], detail=True, permission_classes=[AllowAny])
     def followings(self, request, pk):
         if not pk:
             return Response('Invalid user',HTTP_401_UNAUTHORIZED)
         friendships = Friendship.objects.filter(from_user_id=pk).order_by('-created_at')
-        return Response({'followings': FollowingSerializer(friendships,many=True).data}, status=HTTP_200_OK)
+        page = self.paginate_queryset(friendships)
+        serialzer = FollowingSerializer(
+            page,
+            many=True,
+            context={'request': request},
+        )
+        return self.get_paginated_response(serialzer.data)
 
     @action(methods=['POST'], detail=True, permission_classes=[IsAuthenticated])
     def follow(self, request, pk):
