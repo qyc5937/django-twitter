@@ -50,10 +50,10 @@ class TestCase(DjangoTestCase):
         return client
 
     def get_num_followers(self, client, user):
-        return len(client.get(FRIENDSHIP_FOLLOWERS_API.format(user.id)).data)
+        return len(client.get(FRIENDSHIP_FOLLOWERS_API.format(user.id)).data['results'])
 
     def get_num_followings(self, client, user):
-        return len(client.get(FRIENDSHIP_FOLLOWINGS_API.format(user.id)).data)
+        return len(client.get(FRIENDSHIP_FOLLOWINGS_API.format(user.id)).data['results'])
 
     @property
     def anonymous_client(self):
