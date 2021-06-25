@@ -11,6 +11,7 @@ from tweets.api.serializers import (
 from newsfeeds.services import NewsFeedService
 from utils.decorators import required_params
 from utils.constants import *
+from utils.paginations import EndlessPagination
 
 class TweetViewSet(viewsets.GenericViewSet):
 
@@ -20,6 +21,7 @@ class TweetViewSet(viewsets.GenericViewSet):
 
     serializer_class = TweetSerializerForCreate
     queryset = Tweet.objects.all()
+    pagination_class = EndlessPagination
 
     def create(self, request):
         serialzier = TweetSerializerForCreate(
@@ -50,12 +52,13 @@ class TweetViewSet(viewsets.GenericViewSet):
         tweets = Tweet.objects.filter(
             user_id=request.query_params['user_id']
         ).order_by('-created_at')
+        paginated_tweets = self.paginate_queryset(tweets)
         serializer = TweetSerializersWithCommentsAndLikes(
-            tweets,
+            paginated_tweets,
             context= {'request': request},
             many=True,
         )
-        return Response({"tweets": serializer.data})
+        return self.get_paginated_response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
         tweet = self.get_object()

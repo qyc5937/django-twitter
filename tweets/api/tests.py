@@ -6,6 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework import status
 from comments.models import Comment
 from utils.constants import *
+from utils.paginations import EndlessPagination
 import logging
 class TweetApiTests(TestCase):
 
@@ -34,16 +35,16 @@ class TweetApiTests(TestCase):
             'user_id': self.user1.id
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['tweets']), 6)
+        self.assertEqual(len(response.data['results']), 6)
 
         response = self.anonymous_client.get(TWEET_LIST_API, {
             'user_id': self.user2.id
         })
-        self.assertEqual(len(response.data['tweets']),4)
+        self.assertEqual(len(response.data['results']),4)
 
         #test ordering
-        self.assertEqual(response.data['tweets'][0]['id'], self.user2_tweets[-1].id)
-        self.assertEqual(response.data['tweets'][-1]['id'], self.user2_tweets[0].id)
+        self.assertEqual(response.data['results'][0]['id'], self.user2_tweets[-1].id)
+        self.assertEqual(response.data['results'][-1]['id'], self.user2_tweets[0].id)
 
 
     def test_tweet_likes(self):
@@ -59,7 +60,7 @@ class TweetApiTests(TestCase):
             'user_id': self.user1.id
         })
 
-        self.assertEqual(len(response.data['tweets'][-1]['likes']), 2)
+        self.assertEqual(len(response.data['results'][-1]['likes']), 2)
         comment = self.create_comment(tweet_id=self.user1_tweets[0].id,user_id=self.user2.id)
         self.comments = Comment.objects.all()
         # create likes on comment
@@ -168,5 +169,48 @@ class TweetApiTests(TestCase):
         response = self.auth_client.post(TWEET_CREATE_API, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(TweetPhoto.objects.count(), TWEET_PHOTO_MAX_NUM+1)
+
+    def test_tweet_pagination(self):
+        page_size = EndlessPagination.page_size
+
+        for i in range(2*page_size - len(self.user1_tweets)):
+            self.user1_tweets.append(self.create_tweet(self.user1, 'tweet {}'.format(i)))
+
+        tweets = self.user1_tweets[::-1]
+        #page 1
+        response = self.auth_client.get(TWEET_LIST_API.format(self.user1.id), {'user_id': self.user1.id})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['has_next_page'], True)
+        self.assertEqual(len(response.data['results']), page_size)
+        self.assertEqual(response.data['results'][0]['id'], tweets[0].id)
+        self.assertEqual(response.data['results'][1]['id'], tweets[1].id)
+        self.assertEqual(response.data['results'][page_size-1]['id'], tweets[page_size-1].id)
+
+        #page 2
+        response = self.auth_client.get(TWEET_LIST_API.format(self.user1.id), {
+            'user_id': self.user1.id,
+            'created_at__lt': tweets[page_size-1].created_at
+        })
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['has_next_page'], False)
+        self.assertEqual(len(response.data['results']), page_size)
+        self.assertEqual(response.data['results'][0]['id'], tweets[page_size].id)
+        self.assertEqual(response.data['results'][1]['id'], tweets[page_size+1].id)
+        self.assertEqual(response.data['results'][page_size - 1]['id'], tweets[2*page_size - 1].id)
+
+
+        #get latest tweets
+        new_tweet = self.create_tweet(self.user1, "new tweet")
+        response = self.auth_client.get(TWEET_LIST_API.format(self.user1.id), {
+            'user_id': self.user1.id,
+            'created_at__gt': tweets[0].created_at
+        })
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['has_next_page'], False)
+        self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(response.data['results'][0]['id'], new_tweet.id)
+
 
 
