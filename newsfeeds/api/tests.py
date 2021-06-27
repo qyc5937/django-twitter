@@ -7,6 +7,7 @@ class NewsFeedApiTests(TestCase):
 
     #initial setup
     def setUp(self):
+        self.clear_cache()
         self.users = [
             self.create_user(username='{}_{}'.format(TEST_USER,i))
             for i in range(3)
@@ -23,6 +24,32 @@ class NewsFeedApiTests(TestCase):
             self.clients[1].post(TWEET_CREATE_API, {'content': 'testing_{}'.format(i)})
             for i in range(5,7)
         ]
+
+    def test_user_cache(self):
+        profile = self.users[0].profile
+        profile.nickname = 'cache_test_profile'
+        profile.save()
+
+        self.assertEqual(self.users[0].username, '{}_{}'.format(TEST_USER,0))
+        self.create_newsfeed(self.users[0], self.create_tweet(self.users[1]))
+        self.create_newsfeed(self.users[0], self.create_tweet(self.users[0]))
+
+        response = self.clients[0].get(NEWSFEED_LIST_API)
+        results = response.data['results']
+        self.assertEqual(results[0]['tweet']['user']['username'], '{}_{}'.format(TEST_USER,0))
+        self.assertEqual(results[0]['tweet']['user']['nickname'], 'cache_test_profile')
+        self.assertEqual(results[1]['tweet']['user']['username'], '{}_{}'.format(TEST_USER,1))
+
+        self.users[0].username = 'updated_user'
+        self.users[0].save()
+        profile.nickname = 'another_nickname'
+        profile.save()
+
+        response = self.clients[0].get(NEWSFEED_LIST_API)
+        results = response.data['results']
+        self.assertEqual(results[0]['tweet']['user']['username'], 'updated_user')
+        self.assertEqual(results[0]['tweet']['user']['nickname'], 'another_nickname')
+        self.assertEqual(results[1]['tweet']['user']['username'], '{}_{}'.format(TEST_USER,1))
 
     def test_newsfeed(self):
 

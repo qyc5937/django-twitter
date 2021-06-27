@@ -11,6 +11,7 @@ import logging
 class TweetApiTests(TestCase):
 
     def setUp(self):
+        self.clear_cache()
         self.user1 = self.create_user(TEST_USER, TEST_EMAIL)
         self.user2 = self.create_user('user2')
         self.user3 = self.create_user('user3')
