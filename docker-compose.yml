@@ -14,6 +14,11 @@ services:
       MYSQL_USER: admin
       MYSQL_PASSWORD: admin
 
+  memcached:
+    image: docker.io/bitnami/memcached:1
+    ports:
+      - '11211:11211'
+
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
@@ -23,6 +28,7 @@ services:
       - "8000:8000"
     depends_on:
       - db
+      - memcached
 
 volumes:
   db_data: {}
