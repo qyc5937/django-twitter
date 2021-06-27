@@ -8,9 +8,12 @@ from testing.testconstants import *
 from tweets.models import Tweet
 from newsfeeds.models import NewsFeed
 from django.contrib.contenttypes.models import ContentType
-
+from django.core.cache import caches
 
 class TestCase(DjangoTestCase):
+
+    def clear_cache(self):
+        caches['testing'].clear
 
     def create_user(self, username, email=None, password=None):
         if password is None:
