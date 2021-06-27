@@ -6,6 +6,7 @@ from comments.models import Comment
 from likes.models import Like
 from testing.testconstants import *
 from tweets.models import Tweet
+from newsfeeds.models import NewsFeed
 from django.contrib.contenttypes.models import ContentType
 
 
@@ -37,6 +38,13 @@ class TestCase(DjangoTestCase):
             user=user,
         )
         return like
+
+    def create_newsfeed(self, user, tweet):
+        newsfeed = NewsFeed.objects.create(
+            user = user,
+            tweet = tweet,
+        )
+        return newsfeed
 
     def login_user(self, username, password=None):
         if password is None:
