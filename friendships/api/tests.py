@@ -1,10 +1,8 @@
 from testing.testcases import TestCase
 from testing.testconstants import *
-from rest_framework.test import APIClient
 from friendships.models import Friendship
 from utils.constants import MAX_PAGE_SIZE, DEFAULT_PAGE_SIZE
 from rest_framework.status import *
-import logging
 
 
 class FriendshipApiTests(TestCase):
