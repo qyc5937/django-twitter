@@ -27,6 +27,8 @@ class NewsFeedService(object):
             NewsFeed(tweet=tweet, user=from_user,created_at=tweet.created_at)
             for tweet in Tweet.objects.filter(user=to_user)
         ]
+        #create newsfeed in reverse order
+        newsfeeds = newsfeeds[::-1]
         NewsFeed.objects.bulk_create(newsfeeds)
 
 

@@ -14,7 +14,7 @@ class NewsFeed(models.Model):
         on_delete=models.SET_NULL,
         null=True,
     )
-    created_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         index_together = (
@@ -22,6 +22,7 @@ class NewsFeed(models.Model):
         )
         unique_together = (('user', 'tweet'),)
         ordering=['-created_at']
+
     def __str__(self):
         return 'NewsFeed for user {}: {} at {}'.format(self.user, self.tweet, self.created_at)
 
