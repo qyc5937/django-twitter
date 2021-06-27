@@ -9,6 +9,7 @@ from rest_framework import status
 class InboxTest(TestCase):
 
     def setUp(self):
+        self.clear_cache()
         self.user_1=self.create_user("user1")
         self.user_2=self.create_user("user2")
         self.client_1 = self.login_user(self.user_1)

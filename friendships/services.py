@@ -33,6 +33,6 @@ class FriendshipService(object):
         return user_id_set
 
     @classmethod
-    def invalidated_following_cache(cls, from_user_id):
+    def invalidate_following_cache(cls, from_user_id):
         key = FOLLOWINGS_PATTERN.format(user_id=from_user_id)
         cache.delete(key)

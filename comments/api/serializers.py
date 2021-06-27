@@ -9,7 +9,7 @@ from likes.services import LikeService
 
 class CommentSerializer(serializers.ModelSerializer):
 
-    user = UserSerializerForComment()
+    user = UserSerializerForComment(source='cached_user')
 
     class Meta:
         model = Comment
@@ -60,7 +60,7 @@ class CommentSerializerForUpdate(serializers.ModelSerializer):
         return instance
 
 class CommentSerializerWithLikes(serializers.ModelSerializer):
-    user = UserSerializerForComment()
+    user = UserSerializerForComment(source='cached_user')
     likes = LikeSerializer(source='like_set', many=True)
     likes_count = serializers.SerializerMethodField()
     has_liked = serializers.SerializerMethodField()

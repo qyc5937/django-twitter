@@ -10,7 +10,7 @@ from tweets.services import TweetService
 
 class TweetSerializer(serializers.ModelSerializer):
 
-    user = UserSerializerForTweet()
+    user = UserSerializerForTweet(source='cached_user')
 
     class Meta:
         model =  Tweet
@@ -44,14 +44,9 @@ class TweetSerializerForCreate(serializers.ModelSerializer):
             TweetService.create_tweet_photos(tweet, validated_data['files'])
         return tweet
 
-class TweetSerializerForNewsfeed(serializers.ModelSerializer):
-
-    class Meta:
-        model = Tweet
-        fields = ('id','content',)
 
 class TweetSerializersWithCommentsAndLikes(serializers.ModelSerializer):
-    user = UserSerializerForTweet()
+    user = UserSerializerForTweet(source='cached_user')
     comments = CommentSerializerWithLikes(source='comment_set', many=True)
     likes = LikeSerializer(source='like_set', many=True)
     has_liked = serializers.SerializerMethodField()
@@ -88,3 +83,6 @@ class TweetSerializersWithCommentsAndLikes(serializers.ModelSerializer):
         for photo in obj.tweetphoto_set.all().order_by('order'):
             photo_urls.append(photo.file.url)
         return photo_urls
+
+class TweetSerializerForNewsfeed(TweetSerializersWithCommentsAndLikes):
+    pass

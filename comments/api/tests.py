@@ -9,6 +9,7 @@ class CommentApiTests(TestCase):
 
     #initial setup
     def setUp(self):
+        self.clear_cache()
         self.users = [
             self.create_user(username="testuser{}".format(i))
             for i in range(3)

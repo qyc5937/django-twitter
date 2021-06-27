@@ -5,6 +5,7 @@ from inboxes.services import NotificationService
 class InboxTest(TestCase):
 
     def setUp(self):
+        self.clear_cache()
         self.user_1=self.create_user("user1")
         self.user_2=self.create_user("user2")
         self.tweet=self.create_tweet(self.user_1)
