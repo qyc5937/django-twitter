@@ -26,6 +26,32 @@ class TweetApiTests(TestCase):
             for i in range(4)
         ]
 
+    def test_tweet_cache(self):
+        tweet = self.create_tweet(self.user2, 'test_tweet_cache')
+        self.create_newsfeed(self.user1, tweet)
+        response = self.auth_client.get(NEWSFEED_LIST_API)
+        results = response.data['results']
+        self.assertEqual(results[0]['tweet']['content'], 'test_tweet_cache')
+        self.assertEqual(results[0]['tweet']['user']['username'], 'user2')
+
+        #update user name
+        self.user2.username = 'updated_username'
+        self.user2.save()
+
+        response = self.auth_client.get(NEWSFEED_LIST_API)
+        results = response.data['results']
+        self.assertEqual(results[0]['tweet']['content'], 'test_tweet_cache')
+        self.assertEqual(results[0]['tweet']['user']['username'], 'updated_username')
+
+        #update tweet content
+        tweet.content = 'updated_content'
+        tweet.save()
+
+        response = self.auth_client.get(NEWSFEED_LIST_API)
+        results = response.data['results']
+        self.assertEqual(results[0]['tweet']['content'], 'updated_content')
+        self.assertEqual(results[0]['tweet']['user']['username'], 'updated_username')
+
     def test_tweet_list_api(self):
         #test anonymous user
         response = self.anonymous_client.get(TWEET_LIST_API)

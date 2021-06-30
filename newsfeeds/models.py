@@ -1,3 +1,4 @@
+from utils.memcached_helper import MemcachedHelper
 from django.db import models
 from django.contrib.auth.models import User
 from tweets.models import Tweet
@@ -26,5 +27,8 @@ class NewsFeed(models.Model):
     def __str__(self):
         return 'NewsFeed for user {}: {} at {}'.format(self.user, self.tweet, self.created_at)
 
+    @property
+    def cached_tweet(self):
+        return MemcachedHelper.get_object_through_cache(Tweet, self.tweet.id)
 
 # Create your models here.
