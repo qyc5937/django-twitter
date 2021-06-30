@@ -157,10 +157,14 @@ CACHES = {
     },
 }
 
+TESTING = ((" ".join(sys.argv)).find('manage.py test') != -1)
+if TESTING:
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 REDIS_HOST = '127.0.0.1'
 REDIS_PORT = 6379
 REDIS_KEY_EXPIRE_TIME = 7 * 86400  # in seconds
+REDIS_DB = 0 if TESTING else 1
 
 try:
     from .local_settings import *
@@ -172,7 +176,3 @@ AZURE_ACCOUNT_NAME = 'djangotwitter'
 AZURE_CONTAINER = 'media'
 AZURE_SSL = True
 
-TESTING = ((" ".join(sys.argv)).find('manage.py test') != -1)
-if TESTING:
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-REDIS_DB = 0 if TESTING else 1
