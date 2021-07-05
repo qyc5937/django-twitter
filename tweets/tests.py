@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 
 from django.contrib.auth.models import User
-
+from tweets.services import TweetService
+from twitter.cache import USER_TWEET_PATTERN
 from likes.models import Like
 from testing.testcases import TestCase
 from tweets.models import Tweet,TweetPhoto
@@ -68,3 +69,46 @@ class TweetTests(TestCase):
         self.assertEqual(tweet_photo.user.id, self.users[0].id)
         self.assertEqual(tweet_photo.tweet.id, self.tweets[0].id)
         self.assertEqual(tweet_photo.status, TweetPhotoStatus.PENDING)
+
+
+class TweetServiceTest(TestCase):
+
+    def setUp(self):
+        self.clear_cache()
+        self.user1 = self.create_user('user1')
+
+    def test_get_user_tweets(self):
+        tweet_ids = []
+        for i in range(5):
+            tweet = self.create_tweet(self.user1, 'test tweet{}'.format(i))
+            tweet_ids.append(tweet.id)
+        tweet_ids = tweet_ids[::-1]
+
+        RedisClient.clear()
+        conn = RedisClient.get_connection()
+
+        #cache miss
+        tweets = TweetService.get_cached_tweets(self.user1.id)
+        self.assertEqual([tweet.id for tweet in tweets], tweet_ids)
+
+        #cache hit
+        tweets = TweetService.get_cached_tweets(self.user1.id)
+        self.assertEqual([tweet.id for tweet in tweets], tweet_ids)
+
+        #update
+        new_tweet = self.create_tweet(self.user1, 'another tweet')
+        tweets = TweetService.get_cached_tweets(self.user1.id)
+        tweet_ids.insert(0, new_tweet.id)
+        self.assertEqual([tweet.id for tweet in tweets], tweet_ids)
+
+    def test_create_new_tweet_before_get_cached_tweets(self):
+        tweet1 = self.create_tweet(self.user1, 'test tweet')
+        RedisClient.clear()
+        conn = RedisClient.get_connection()
+        key = USER_TWEET_PATTERN.format(user_id=self.user1.id)
+        self.assertEqual(conn.exists(key), False)
+        tweet2 = self.create_tweet(self.user1, 'another tweet')
+        self.assertEqual(conn.exists(key), True)
+
+        tweets = TweetService.get_cached_tweets(self.user1)
+        self.assertEqual([tweet.id for tweet in tweets], [tweet2.id, tweet1.id])

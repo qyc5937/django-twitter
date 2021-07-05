@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from tweets.models import Tweet
+from tweets.services import TweetService
 from tweets.api.serializers import (
     TweetSerializer,
     TweetSerializerForCreate,
@@ -49,9 +50,7 @@ class TweetViewSet(viewsets.GenericViewSet):
 
     @required_params(method='GET', params=['user_id'] )
     def list(self, request, *args, **kwargs):
-        tweets = Tweet.objects.filter(
-            user_id=request.query_params['user_id']
-        ).order_by('-created_at')
+        tweets = TweetService.get_cached_tweets(user_id=request.query_params['user_id'])
         paginated_tweets = self.paginate_queryset(tweets)
         serializer = TweetSerializersWithCommentsAndLikes(
             paginated_tweets,
