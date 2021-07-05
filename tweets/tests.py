@@ -6,6 +6,8 @@ from likes.models import Like
 from testing.testcases import TestCase
 from tweets.models import Tweet,TweetPhoto
 from tweets.constants import TweetPhotoStatus
+from utils.redis_client import RedisClient
+from utils.redis_serializers import DjangoModelSerializer
 
 # Create your tests here.
 class TweetTests(TestCase):
@@ -26,6 +28,18 @@ class TweetTests(TestCase):
             self.create_tweet(user=self.users[i%2], content="test tweet {}".format(i))
             for i in range(5)
         ]
+
+    def test_cache_tweet_in_redis(self):
+        tweet = self.tweets[0]
+        conn = RedisClient.get_connection()
+        serialized_data = DjangoModelSerializer.serialize(tweet)
+        conn.set(f'tweet:{tweet.id}', serialized_data)
+        data=conn.get('tweet:bogus')
+        self.assertEqual(data, None)
+
+        data = conn.get(f'tweet:{tweet.id}')
+        cached_tweet = DjangoModelSerializer.deserialize(data)
+        self.assertEqual(cached_tweet, tweet)
 
     def test_hours_to_now(self):
         test_user = User.objects.create_user(username='testuser')
