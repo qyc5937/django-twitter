@@ -161,7 +161,7 @@ TESTING = ((" ".join(sys.argv)).find('manage.py test') != -1)
 if TESTING:
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
-REDIS_HOST = '127.0.0.1'
+REDIS_HOST = 'redis'
 REDIS_PORT = 6379
 REDIS_KEY_EXPIRE_TIME = 7 * 86400  # in seconds
 REDIS_DB = 0 if TESTING else 1
