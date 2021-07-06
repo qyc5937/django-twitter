@@ -1,6 +1,8 @@
 from newsfeeds.models import NewsFeed
 from tweets.models import Tweet
 from friendships.services import FriendshipService
+from utils.redis_helper import RedisHelper
+from twitter.cache import USER_NEWSFEEDS_PATTERN
 import logging
 
 class NewsFeedService(object):
@@ -31,6 +33,8 @@ class NewsFeedService(object):
         newsfeeds = newsfeeds[::-1]
         NewsFeed.objects.bulk_create(newsfeeds)
 
+        for newsfeed in newsfeeds:
+            cls.push_newsfeed_to_cache(newsfeed)
 
     '''
     Remove tweets from timeline when a friendship has ended
@@ -41,3 +45,15 @@ class NewsFeedService(object):
         from_user, to_user = friendship.from_user_id, friendship.to_user_id
         tweets = Tweet.objects.filter(user_id=to_user)
         NewsFeed.objects.filter(user_id=from_user,tweet__user__tweet__in=tweets).delete()
+
+    @classmethod
+    def get_cached_newsfeeds(cls, user_id):
+        queryset = NewsFeed.objects.filter(user_id=user_id)
+        key = USER_NEWSFEEDS_PATTERN.format(user_id=user_id)
+        return RedisHelper.load_objects(key,queryset)
+
+    @classmethod
+    def push_newsfeed_to_cache(cls, newsfeed):
+        queryset = NewsFeed.objects.filter(user_id=newsfeed.user_id).order_by('-created_at')
+        key = USER_NEWSFEEDS_PATTERN.format(user_id=newsfeed.user_id)
+        return RedisHelper.push_objects(key, newsfeed, queryset)

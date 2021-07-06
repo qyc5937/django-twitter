@@ -75,6 +75,7 @@ class TweetServiceTest(TestCase):
 
     def setUp(self):
         self.clear_cache()
+        RedisClient.clear()
         self.user1 = self.create_user('user1')
 
     def test_get_user_tweets(self):
